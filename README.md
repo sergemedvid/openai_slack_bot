@@ -28,6 +28,8 @@ Navigate into the cloned repository directory and install the necessary dependen
 
 ```
 cd <repository-directory>
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 ### 3.Set up environment variables
@@ -45,7 +47,7 @@ Run the main script to start the server:The server will start running on http://
 ### 5.Run your Ngrok instance to create a public URL for your local server
 run it in terminal
 ```
-ngrok http 3000
+ngrok http 5001
 ```
 if ngrok not installed, install through following command in macos terminal:
 ```

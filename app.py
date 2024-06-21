@@ -5,7 +5,7 @@ from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts.prompt import PromptTemplate
 
 # Load the environment variables
@@ -20,7 +20,7 @@ app = App(token=slack_bot_token, signing_secret=signing_secret)
 flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
-CHATAI = ChatOpenAI(temperature=0.9,model_name='gpt-3.5-turbo',max_tokens=1500, openai_api_key=openai_api_key)
+CHATAI = ChatOpenAI(model_name='gpt-4o', openai_api_key=openai_api_key)
 
 template = """Assistant is a large language model trained by OpenAI.
 
