@@ -31,30 +31,38 @@ chat_chain = ConversationChain(memory=memory, llm=CHATAI, prompt=prompt,verbose=
 @app.event("app_mention")
 def handle_app_mentions(body, say, logger):
     user_id = body["event"]["user"]
+    channel_id = body["event"]["channel"]
     event_ts = body["event"].get("ts")
-    thread_ts = body["event"].get("thread_ts")
+    thread_ts = body["event"].get("thread_ts") or event_ts
 
-    # If the message is not in a thread, reply in a thread.
-    if not thread_ts:
-        thread_ts = event_ts
+    # Send "Thinking... please wait" message and capture its ts
+    result = say(text="Thinking... please wait", thread_ts=thread_ts)
+    thinking_message_ts = result["ts"]
 
+    # Generate the actual response
     text = body["event"]["text"]
     response = chat_chain.predict(input=text)
-    say(text=f"Hi there, <@{user_id}>!\n{response}", thread_ts=thread_ts)
+
+    # Edit the "Thinking" message with the actual response
+    app.client.chat_update(channel=channel_id, ts=thinking_message_ts, text=f"Hi there, <@{user_id}>!\n{response}", thread_ts=thread_ts)
 
 @app.event("message")
 def handle_message_events(body, say, logger):
     user_id = body["event"]["user"]
+    channel_id = body["event"]["channel"]
     event_ts = body["event"].get("ts")
-    thread_ts = body["event"].get("thread_ts")
+    thread_ts = body["event"].get("thread_ts") or event_ts
 
-    # If the message is not in a thread, reply in a thread.
-    if not thread_ts:
-        thread_ts = event_ts
+    # Send "Thinking... please wait" message and capture its ts
+    result = say(text="Thinking... please wait", thread_ts=thread_ts)
+    thinking_message_ts = result["ts"]
 
+    # Generate the actual response
     text = body["event"]["text"]
     response = chat_chain.predict(input=text)
-    say(text=f"Hi there, <@{user_id}>!\n{response}", thread_ts=thread_ts)
+
+    # Edit the "Thinking" message with the actual response
+    app.client.chat_update(channel=channel_id, ts=thinking_message_ts, text=f"Hi there, <@{user_id}>!\n{response}", thread_ts=thread_ts)
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
