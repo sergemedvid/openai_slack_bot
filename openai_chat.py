@@ -2,7 +2,7 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
 from langchain_openai import ChatOpenAI
 from langchain.prompts.prompt import PromptTemplate
-from ichat import IChat
+from interfaces.chat import IChat
 
 class OpenAIChat(IChat):
     def __init__(self, openai_api_key: str):

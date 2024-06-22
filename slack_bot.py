@@ -4,7 +4,7 @@ from flask import Flask, request
 from dotenv import load_dotenv, find_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from ichat import IChat
+from interfaces.chat import IChat
 
 class SlackBot:
     def __init__(self, chat_service: IChat, slack_bot_token: str, signing_secret: str):
