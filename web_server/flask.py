@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-from interfaces.webserver import IWebServer
+from interfaces.web_server import IWebServer
 
 class FlaskWebServer(IWebServer):
     def __init__(self):
