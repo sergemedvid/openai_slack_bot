@@ -58,6 +58,11 @@ Replace "Your Slack Bot Token", "Your OpenAI API Key", and "Your Slack App Signi
 #### 4.1.Start the server
 
 Run the main script to start the server:The server will start running on <http://localhost:5001>.
+Also, you can run it via Gunicorn with reload option:
+
+```shell
+gunicorn 'app:app' -b 127.0.0.1:5001 --reload
+```
 
 #### 4.2.Run your Ngrok instance to create a public URL for your local server
 
@@ -89,6 +94,6 @@ Since the above command binds the server to localhost, you can use Nginx to bind
 
 ### 6.Go to your Slack App's settings in the Slack API dashboard
 
-Set the Request URL under 'Event Subscriptions' to the https URL provided by ngrok, followed by /slack/events.
+Set the Request URL under 'Event Subscriptions' to the https URL provided by ngrok (when developing), followed by /slack/events.
 After setting up, you can interact with the bot in Slack by directly messaging the bot or mentioning the bot in a channel.
 **Enjoy chatting with your new AI-powered Slack bot!**

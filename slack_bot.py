@@ -9,7 +9,6 @@ from interfaces.web_server import IWebServer
 
 class SlackBot:
     def __init__(self, chat_service: IChat, web_server: IWebServer, slack_bot_token: str, signing_secret: str):
-        load_dotenv(find_dotenv())
         self.slack_bot_token = slack_bot_token
         self.signing_secret = signing_secret
         self.app = App(token=self.slack_bot_token, signing_secret=self.signing_secret)
