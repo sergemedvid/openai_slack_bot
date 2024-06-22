@@ -2,11 +2,11 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
 from langchain_openai import ChatOpenAI
 from langchain.prompts.prompt import PromptTemplate
-import os
+from ichat import IChat
 
-class OpenAIChat:
-    def __init__(self):
-        self.openai_api_key = os.environ["OPENAI_API_KEY"]
+class OpenAIChat(IChat):
+    def __init__(self, openai_api_key: str):
+        self.openai_api_key = openai_api_key
         self.CHATAI = ChatOpenAI(model_name='gpt-4o', openai_api_key=self.openai_api_key)
         with open("assistant_prompt_template.txt") as f:
             template = f.read()
