@@ -53,11 +53,13 @@ SIGNING_SECRET=<Your Slack App Signing Secret>
 
 Replace "Your Slack Bot Token", "Your OpenAI API Key", and "Your Slack App Signing Secret" with your own values.
 
-### 4.Start the server
+### 4.Development mode
+
+#### 4.1.Start the server
 
 Run the main script to start the server:The server will start running on <http://localhost:5001>.
 
-### 5.Run your Ngrok instance to create a public URL for your local server
+#### 4.2.Run your Ngrok instance to create a public URL for your local server
 
 run it in terminal
 
@@ -70,6 +72,20 @@ if ngrok not installed, install through following command in macos terminal:
 ```shell
 brew install ngrok
 ```
+
+### 5.Production mode
+
+#### 5.1.Run via Gunicorn
+
+To run the server in production mode, you can use Gunicorn. It is available as a dependency in the requirements.txt file. Run the following command to start the server ("w" is the number of workers; it can be adjusted based on server CPU cores and memory):
+
+```shell
+gunicorn 'app:app' -w 4 -b 127.0.0.1:5001
+```
+
+#### 5.2.Bind via Nginx
+
+Since the above command binds the server to localhost, you can use Nginx to bind the server to a public IP address. You can follow the instructions in the Nginx documentation to set up a reverse proxy.
 
 ### 6.Go to your Slack App's settings in the Slack API dashboard
 

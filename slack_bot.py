@@ -45,6 +45,3 @@ class SlackBot:
 
     def slack_events(self):
         return self.handler.handle(request)
-
-    def run(self):
-        self.web_server.run(port=5001)

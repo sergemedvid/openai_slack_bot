@@ -5,6 +5,9 @@ from interfaces.web_server import IWebServer
 class FlaskWebServer(IWebServer):
     def __init__(self):
         self.app = Flask(__name__)
+        
+    def get_app(self):
+        return self.app
 
     def run(self, port: int):
         self.app.run(port=port)
