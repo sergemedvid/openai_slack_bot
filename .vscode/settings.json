@@ -5,6 +5,7 @@
         "gunicorn",
         "langchain",
         "openai",
+        "pydantic",
         "venv"
     ]
 }

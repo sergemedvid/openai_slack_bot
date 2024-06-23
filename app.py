@@ -1,5 +1,5 @@
 from slack_bot import SlackBot
-from chat.openai import OpenAIChat
+from chat.openai import BufferWindowMemoryFactory, OpenAIChat, SlackThreadMemoryFactory
 from dotenv import load_dotenv
 import os
 
@@ -8,13 +8,22 @@ from web_server.flask import FlaskWebServer
 # Load environment variables
 load_dotenv()
 
-# Initialize services
-chat_service = OpenAIChat(openai_api_key=os.environ["OPENAI_API_KEY"])
-web_server = FlaskWebServer()
-bot = SlackBot(chat_service=chat_service, web_server=web_server,
-               slack_bot_token=os.environ["SLACK_BOT_TOKEN"], signing_secret=os.environ["SIGNING_SECRET"])
+def initialize_services():
+    web_server = FlaskWebServer()
+    bot = SlackBot(chat_service=None, web_server=web_server,
+                   slack_bot_token=os.environ["SLACK_BOT_TOKEN"], signing_secret=os.environ["SIGNING_SECRET"])
 
-# Get the Flask app instance
+    memory_factory = SlackThreadMemoryFactory(memory_key="history", slack_bot=bot)
+    #memory_factory = BufferWindowMemoryFactory(k=5, memory_key="history")
+    chat_service = OpenAIChat(openai_api_key=os.environ["OPENAI_API_KEY"], memory_factory=memory_factory)
+
+    # Link the chat_service back to the bot
+    bot.chat_service = chat_service
+
+    return web_server, bot
+
+# Get the Flask app instance through the initialization function
+web_server, bot = initialize_services()
 app = web_server.get_app()
 
 if __name__ == "__main__":
