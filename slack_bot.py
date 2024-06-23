@@ -67,18 +67,16 @@ class SlackBot:
         return self.bot_user_id
 
     def send_message(self, channel_id, user_id, thread_ts, text, message_ts=None):
+        if message_ts:
+            # Delete the "Thinking..." message
+            self.app.client.chat_delete(channel=channel_id, ts=message_ts, as_user=True)
+        
         paragraphs = text.split("\n\n")
         current_message = ""
-        first_chunk_sent = False
         for paragraph in paragraphs:
             if len(current_message) + len(paragraph) + 1 > SlackBot.MAX_MESSAGE_LENGTH:
-                if not first_chunk_sent and message_ts:
-                    # Update the thinking message with the first chunk
-                    self.app.client.chat_update(channel=channel_id, ts=message_ts, text=current_message, thread_ts=thread_ts)
-                    first_chunk_sent = True
-                else:
-                    # Send the current message if it reaches the limit
-                    self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
+                # Send the current message if it reaches the limit
+                self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
                 current_message = paragraph  # Start a new message
             else:
                 if current_message:
@@ -86,12 +84,7 @@ class SlackBot:
                 current_message += paragraph
         # Send any remaining message
         if current_message:
-            if not first_chunk_sent and message_ts:
-                # Update the thinking message if it's the first chunk
-                self.app.client.chat_update(channel=channel_id, ts=message_ts, text=current_message, thread_ts=thread_ts)
-            else:
-                # Otherwise, send as a new message
-                self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts)
+            self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
 
     def handle_app_mentions(self, body, say, logger):
         self._handle_event(body, say, logger)
@@ -100,6 +93,10 @@ class SlackBot:
         self._handle_event(body, say, logger)
 
     def _handle_event(self, body, say, logger):
+        # Skip deleted/changed messages
+        if body["event"].get("subtype") == "message_changed" or body["event"].get("subtype") == "message_deleted":
+            return
+        
         user_id = body["event"]["user"]
         channel_id = body["event"]["channel"]
         event_ts = body["event"].get("ts")
