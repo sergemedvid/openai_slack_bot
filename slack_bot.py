@@ -54,12 +54,11 @@ class SlackBot:
     def get_messages(self, channel_id, thread_ts):
         messages = self.app.client.conversations_replies(channel=channel_id, ts=thread_ts)
         # Filter out messages containing the THINKING_MESSAGE
-        filtered_messages = [msg for msg in messages['messages'] if SlackBot.THINKING_MESSAGE not in msg.get('text', '')]
+        filtered_messages = [msg for msg in messages['messages'] if msg.get('text', '') != SlackBot.THINKING_MESSAGE]
         return {"messages": filtered_messages}
     
     def get_current_event_messages(self):
         if self.channel_id and self.thread_ts:
-            print(f"Getting messages for channel {self.channel_id} and thread {self.thread_ts}")
             return self.get_messages(self.channel_id, self.thread_ts)
         else:
             return None
