@@ -1,3 +1,4 @@
+import threading
 from flask import Flask, request
 from dotenv import load_dotenv, find_dotenv
 from slack_bolt import App
@@ -16,6 +17,7 @@ class SlackBot:
         self.web_server = web_server
         self.handler = SlackRequestHandler(self.app)
         self.chat_service = chat_service
+        self.lock = threading.Lock()  # Initialize the lock
         self._fetch_and_store_bot_user_id()
         self._register_events()
 
@@ -32,23 +34,22 @@ class SlackBot:
         self.web_server.add_route("/slack/events", self.slack_events, ["POST"])
 
     def process_slack_event(self, say, user_id, channel_id, thread_ts, text):
-        # Save state
-        self.channel_id = channel_id
-        self.thread_ts = thread_ts
-        self.user_id = user_id
-        self.say = say
-
-        result = say(text=SlackBot.THINKING_MESSAGE, thread_ts=thread_ts, mrkdwn=True)
-        thinking_message_ts = result["ts"]
-        response = self.chat_service.get_response(input_text=text)
-        # Directly call send_message with the entire response and thinking_message_ts
-        self.send_message(channel_id, user_id, thread_ts, response, thinking_message_ts)
-        
-        # Clear state
-        self.channel_id = None
-        self.thread_ts = None
-        self.user_id = None
-        self.say = None
+        with self.lock:  # Acquire the lock
+            # Save state
+            self.channel_id = channel_id
+            self.thread_ts = thread_ts
+            self.user_id = user_id
+            self.say = say
+            result = say(text=SlackBot.THINKING_MESSAGE, thread_ts=thread_ts, mrkdwn=True)
+            thinking_message_ts = result["ts"]
+            response = self.chat_service.get_response(input_text=text)
+            # Directly call send_message with the entire response and thinking_message_ts
+            self.send_message(channel_id, user_id, thread_ts, response, thinking_message_ts)
+            # Clear state
+            self.channel_id = None
+            self.thread_ts = None
+            self.user_id = None
+            self.say = None
 
     def get_messages(self, channel_id, thread_ts):
         messages = self.app.client.conversations_replies(channel=channel_id, ts=thread_ts)
