@@ -18,8 +18,9 @@ class SlackThreadMemory(BaseChatMemory):
                 messages.append(AIMessage(content=msg['text']))
             else:
                 messages.append(HumanMessage(content=msg['text']))
-        # Remove last human message as we use it to get the input
-        messages.pop()
+        # Remove last human message as we use it to get the input, but only if there's at least one
+        if messages and isinstance(messages[-1], HumanMessage):
+            messages.pop()
         return messages
 
     @property
