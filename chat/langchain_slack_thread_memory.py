@@ -29,7 +29,6 @@ class LangchainSlackThreadMemory(BaseChatMemory):
 
     def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         messages = self.fetch_slack_messages()
-        print(f"Loaded {len(messages)} messages from Slack")
         # Initialize formatted_messages as an empty string
         formatted_messages = ""
         # Iterate over each message and format it
