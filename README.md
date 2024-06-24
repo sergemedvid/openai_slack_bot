@@ -4,8 +4,6 @@
 
 This project aims to create a Slack bot that utilizes the OpenAI GPT-3.5-turbo model as an intelligent language model assistant. The bot can handle a wide range of tasks, such as answering simple questions, engaging in conversations, providing in-depth explanations, and offering insights on various topics.
 
-The Slack bot is powered by langchain, a package that provides a chat framework for language model-based AI services. The project also makes use of Flask for the web server and the Slack Bolt Python package for easy interactions with the Slack API.
-
 The following features are included in this project:
 
 Conversation management with memory for context retention

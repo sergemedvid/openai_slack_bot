@@ -3,7 +3,6 @@
         "dotenv",
         "envexample",
         "gunicorn",
-        "langchain",
         "openai",
         "pydantic",
         "venv"
