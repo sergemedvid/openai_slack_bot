@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import Dict, List
 
 class IChatMemory(ABC):
     @abstractmethod
-    def add(self, key, value):
+    def get_messages(self) -> List[Dict[str, str]]:
         pass
     
     @abstractmethod

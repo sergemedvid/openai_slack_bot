@@ -1,13 +1,14 @@
 from typing import Dict, List
-from pydantic import Field
+from interfaces.chat_memory import IChatMemory
 from slack_bot import SlackBot
 
 
-class SlackThreadMemory:
-    slack_bot: SlackBot = Field(...)
-    memory_key: str = Field(...)
+class SlackThreadMemory(IChatMemory):
+    def __init__(self, slack_bot: SlackBot, memory_key: str):
+        self.slack_bot = slack_bot
+        self.memory_key = memory_key
     
-    def fetch_slack_messages(self) -> List[Dict[str, str]]:
+    def get_messages(self) -> List[Dict[str, str]]:
         response = self.slack_bot.get_current_event_messages()
         messages = []
         for msg in response['messages']:
@@ -17,7 +18,8 @@ class SlackThreadMemory:
             messages.pop()
         return messages
 
-    def format_messages(self, messages: List[Dict[str, str]]) -> str:
+    def format_messages(self) -> str:
+        messages = self.get_messages()
         formatted_messages = ""
         for message in messages:
             formatted_messages += f"{message['type']}: {message['content']}\n"
