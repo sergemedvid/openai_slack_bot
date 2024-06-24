@@ -1,3 +1,4 @@
+import re
 import threading
 from flask import Flask, request
 from dotenv import load_dotenv, find_dotenv
@@ -66,16 +67,17 @@ class SlackBot:
     def get_bot_user_id(self):
         return self.bot_user_id
 
-    def send_message(self, channel_id, user_id, thread_ts, text, message_ts=None):
-        if message_ts:
-            # Delete the "Thinking..." message
-            self.app.client.chat_delete(channel=channel_id, ts=message_ts, as_user=True)
+    def send_message(self, channel_id, user_id, thread_ts, text, replace_message_ts=None):
+        if replace_message_ts:
+            # Delete the message marked for replacement
+            self.app.client.chat_delete(channel=channel_id, ts=replace_message_ts, as_user=True)
         
         paragraphs = text.split("\n\n")
         current_message = ""
         for paragraph in paragraphs:
             if len(current_message) + len(paragraph) + 1 > SlackBot.MAX_MESSAGE_LENGTH:
                 # Send the current message if it reaches the limit
+                current_message = SlackBot._convert_markdown_to_slack(current_message)                
                 self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
                 current_message = paragraph  # Start a new message
             else:
@@ -84,7 +86,36 @@ class SlackBot:
                 current_message += paragraph
         # Send any remaining message
         if current_message:
+            current_message = SlackBot._convert_markdown_to_slack(current_message)
             self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
+
+    def _convert_markdown_to_slack(markdown_text):
+        def convert_headers(match):
+            header_content = match.group(2)
+            # Remove any existing bold and italic within the header
+            header_content = re.sub(r'\*\*(.*?)\*\*', r'\1', header_content)
+            header_content = re.sub(r'\*(.*?)\*', r'\1', header_content)
+            header_content = re.sub(r'_(.*?)_', r'\1', header_content)
+            header_content = re.sub(r'__(.*?)__', r'\1', header_content)
+            header_content = re.sub(r'~~(.*?)~~', r'\1', header_content)
+            # Make the entire header bold for Slack
+            return f"*{header_content}*"
+
+        # Convert headers to bold
+        header_pattern = re.compile(r'^(#+\s*)(.*)', re.MULTILINE)
+        slack_text = header_pattern.sub(convert_headers, markdown_text)
+        
+        # Convert bold
+        slack_text = re.sub(r'\*\*(.*?)\*\*', r'*\1*', slack_text)
+        
+        # Convert italic __text__ to _text_
+        slack_text = re.sub(r'__(.*?)__', r'_\1_', slack_text)
+        slack_text = re.sub(r'_(.*?)_', r'_\1_', slack_text)
+        
+        # Convert strikethrough
+        slack_text = re.sub(r'~~(.*?)~~', r'~\1~', slack_text)
+        
+        return slack_text
 
     def handle_app_mentions(self, body, say, logger):
         self._handle_event(body, say, logger)
