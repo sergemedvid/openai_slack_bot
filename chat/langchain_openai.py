@@ -17,6 +17,3 @@ class LangchainOpenAIChat(IChat):
 
     def get_response(self, input_text):
         return self.chat_chain.predict(input=input_text)
-
-    def get_memory(self):
-        return self.memory
