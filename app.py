@@ -1,5 +1,6 @@
+from chat.memory_factories import BufferWindowMemoryFactory, SlackThreadMemoryFactory
 from slack_bot import SlackBot
-from chat.openai import BufferWindowMemoryFactory, OpenAIChat, SlackThreadMemoryFactory
+from chat.langchain_openai import LangchainOpenAIChat
 from dotenv import load_dotenv
 import os
 
@@ -15,7 +16,7 @@ def initialize_services():
 
     memory_factory = SlackThreadMemoryFactory(memory_key="history", slack_bot=bot)
     #memory_factory = BufferWindowMemoryFactory(k=5, memory_key="history")
-    chat_service = OpenAIChat(openai_api_key=os.environ["OPENAI_API_KEY"], memory_factory=memory_factory)
+    chat_service = LangchainOpenAIChat(openai_api_key=os.environ["OPENAI_API_KEY"], memory_factory=memory_factory)
 
     # Link the chat_service back to the bot
     bot.chat_service = chat_service
