@@ -23,7 +23,6 @@ class OpenAIChat(IChat):
         
         # Append the current input text as the latest message from the user
         messages_for_openai.append({"role": "user", "content": input_text})
-        print(messages_for_openai)
         
         # Call the OpenAI API with the prepared messages
         response = self.client.chat.completions.create(model="gpt-4o", messages=messages_for_openai)
