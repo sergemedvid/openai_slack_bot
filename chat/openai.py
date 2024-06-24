@@ -16,7 +16,7 @@ class OpenAIChat(IChat):
         # Convert structured messages to the format expected by OpenAI API
         messages_for_openai = []
         for msg in structured_messages:
-            role = "system" if msg["type"] == "Assistant" else "user"
+            role = "assistant" if msg["type"] == "Assistant" else "user"
             messages_for_openai.append({"role": role, "content": msg["content"]})
         
         # Append the current input text as the latest message from the user
