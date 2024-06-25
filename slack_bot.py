@@ -9,7 +9,6 @@ from interfaces.web_server import IWebServer
 from util.text_processor import TextProcessor
 
 class SlackBot:
-    MAX_MESSAGE_LENGTH = 4000
     THINKING_MESSAGE = "Thinking... please wait"
 
     def __init__(self, chat_service: IChat, web_server: IWebServer, slack_bot_token: str, signing_secret: str):
@@ -73,22 +72,16 @@ class SlackBot:
             # Delete the message marked for replacement
             self.app.client.chat_delete(channel=channel_id, ts=replace_message_ts, as_user=True)
         
-        paragraphs = text.split("\n\n")
-        current_message = ""
-        for paragraph in paragraphs:
-            if len(current_message) + len(paragraph) + 1 > SlackBot.MAX_MESSAGE_LENGTH:
-                # Send the current message if it reaches the limit
-                current_message = TextProcessor.convert_markdown_to_slack(current_message)                
-                self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
-                current_message = paragraph  # Start a new message
-            else:
-                if current_message:
-                    current_message += "\n\n"
-                current_message += paragraph
-        # Send any remaining message
-        if current_message:
-            current_message = TextProcessor.convert_markdown_to_slack(current_message)
-            self.app.client.chat_postMessage(channel=channel_id, text=current_message, thread_ts=thread_ts, mrkdwn=True)
+        messages = TextProcessor.split_text_by_paragraphs(text)
+        
+        for message in messages:
+            slack_formatted_message = TextProcessor.convert_markdown_to_slack(message)
+            self.app.client.chat_postMessage(
+                channel=channel_id,
+                text=slack_formatted_message,
+                thread_ts=thread_ts,
+                mrkdwn=True
+            )
 
     def handle_app_mentions(self, body, say, logger):
         self._handle_event(body, say, logger)
