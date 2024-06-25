@@ -26,6 +26,7 @@ class OpenAIChat(IChat):
         
         # Call the OpenAI API with the prepared messages
         response = self.client.chat.completions.create(model="gpt-4o", messages=messages_for_openai)
+        print(f"Actual tokens: {response.usage.prompt_tokens} prompt tokens, {response.usage.completion_tokens} completion tokens")
         
         # Return the response content if available, otherwise return "No response"
         return response.choices[0].message.content if response.choices else "No response"
