@@ -34,18 +34,35 @@ class TextProcessor:
 
     @staticmethod
     def split_text_by_paragraphs(text):
-        paragraphs = text.split("\n\n")
+        paragraphs = text.split("\n")
         messages = []
         current_message = ""
+        in_code_block = False
+        code_block_leading_spaces = 0
 
         for paragraph in paragraphs:
-            if len(current_message) + len(paragraph) + 1 > TextProcessor.MAX_MESSAGE_LENGTH:
+            match = re.match(r'^(\s*)```[a-zA-Z]+$', paragraph)
+            if match:
+                in_code_block = True
+                code_block_leading_spaces = len(match.group(1))
+            if re.match(r'^\s*```$', paragraph) and in_code_block:
+                in_code_block = False
+            
+            if not in_code_block and not re.match(r'^\s*```$', paragraph):
+                paragraph = TextProcessor.convert_markdown_to_slack(paragraph)
+            
+            if len(current_message) + len(paragraph) + 1 + (4+code_block_leading_spaces if in_code_block else 0) > TextProcessor.MAX_MESSAGE_LENGTH:
                 # Append the current message if it reaches the limit
-                messages.append(current_message)
-                current_message = paragraph  # Start a new message
+                if in_code_block and not re.match(r'^```[a-zA-Z]+$', paragraph):
+                    current_message = current_message + "\n" + " " * code_block_leading_spaces + "```"
+                    messages.append(current_message)
+                    current_message = " " * code_block_leading_spaces + "```\n" + paragraph
+                else:
+                    messages.append(current_message)
+                    current_message = paragraph
             else:
                 if current_message:
-                    current_message += "\n\n"
+                    current_message += "\n"
                 current_message += paragraph
 
         # Append any remaining message

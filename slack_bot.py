@@ -75,10 +75,9 @@ class SlackBot:
         messages = TextProcessor.split_text_by_paragraphs(text)
         
         for message in messages:
-            slack_formatted_message = TextProcessor.convert_markdown_to_slack(message)
             self.app.client.chat_postMessage(
                 channel=channel_id,
-                text=slack_formatted_message,
+                text=message,
                 thread_ts=thread_ts,
                 mrkdwn=True
             )
